@@ -155,7 +155,7 @@ function sendResetPassword($email, $hex_token) {
 
     $mail->AltBody = 'Password Reset<br>';
     $mail->AltBody .= 'We have received a request to reset your password.<br>';
-    $mail->AltBody .= '<a href="localhost/PHPMAILER/reset-pass.php?code="' . $hex_token . '">Reset Password</a><br>';
+    $mail->AltBody .= '<a href="http://localhost/PHPMAILER/reset-pass.php?code="' . $hex_token . '">Reset Password</a><br>';
 
     $_SESSION["token"] = $hex_token;
     $_SESSION["email-verify"] = $email;

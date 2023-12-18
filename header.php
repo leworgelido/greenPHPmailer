@@ -120,14 +120,19 @@
     <div class="right-section">
       <div class="btn">
         <?php
+
+        if(!empty($username)){
           if(!isset($username)){
           } else {
+          
             ?>
             <form action="logout.php" method="POST" onsubmit="return submitForm(this)">
               <button type="submit" class="btn-logout">Logout</button>
             </form>
             <?php
           }
+        }
+
         ?>
       </div>
       <script>
