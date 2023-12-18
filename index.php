@@ -7,7 +7,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST") {
   $email = trim($_POST["email"]);
 
   if(empty($email) || empty($pwd)){
-    $error = "kumpletuhin mo laman idol, tnx";
+    $error = "Please fill out the all fields.";
   } else {
 
     $qry = "SELECT * FROM users WHERE email = :email";
@@ -15,22 +15,23 @@ if($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->bindParam(":email", $email);
     $stmt->execute();  
 
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $user = $stmt->fetch();
 
     if(!$user) {
-      $error = "Invalid email or password";
+      $error = "Invalid Email or Password!";
     } else {
       $db_pwd = $user["pwd"];
-      $email = $user["email"];
-      $username = $user["username"];
-
-      if($db_pwd === $pwd){
+      
+      if(password_verify($pwd, $db_pwd)){
+        $username = $user["username"];
         $_SESSION["email"]  = $email;
         $_SESSION["username"] = $username;
+
         header("Location: home.php");
-        exit();
+        die();
       } else {
-        $error = "mali pass";
+        $error = "Invalid Email or Password!";
+        
       }
     }
      
@@ -44,6 +45,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PHP MAILER</title>
 </head>
+
 <style>
   * {
     margin: 0;
@@ -64,6 +66,8 @@ if($_SERVER["REQUEST_METHOD"] === "POST") {
   padding: 70px;
   width: 500px;
   border-radius: 2px;
+  box-shadow: 2px 2px 20px rgba(0, 0, 0, .05);
+
   
 }
 
@@ -88,7 +92,7 @@ form .btn{
   color: white;
   border-radius: 4px;
   cursor: pointer;
-  transition: all .15s ease-in;
+  transition: all .25s ease-in;
 }
 
 form .btn:hover {
@@ -96,7 +100,7 @@ form .btn:hover {
   color: black;
 }
 a {
-  color: rgb(85, 26, 139);
+  color: #7630ff;
   text-decoration: none;
   transition: all .15s ease;
 }
@@ -106,31 +110,107 @@ a:hover{
 }
 
 .text {
-  background-color: lightgreen;
-  border: 1px solid green;
-  padding: 7px;
+  background-color: #90ee90;
+  border: none;
+  padding: 14px;
   border-radius: 2px;
   text-align: center;
   margin-bottom: 10px;
+  font-size: 15px;
+  color: darkgreen;
+}
+
+.text1  {
+  margin-left: 5px;
+  font-size: 15px;
+  margin-bottom: 5px;
+}
+
+.text2 {
+  margin-left: 5px;
+  font-size: 15px;
+}
+
+.error {
+  padding: 12px;
+  background-color: #ffcccb;
+  margin-top: 10px;
+  border-radius: 2px;
+  text-align: center;
+  font-size: 15px;
+  color: darkred;
+}
+
+.gif-container {
+  position: absolute;
+  top: 200px;
+  right: 50px;
+
+}
+
+.jif {
+  width: 300px;
+  height: 200px;
+  border-radius: 3px;
+}
+
+.gif-container2 {
+  position: absolute;
+  top: 200px;
+  left: 50px  ;
 }
 </style>
+
 <body>
+  <?php
+    include 'header.php';
+  ?>
   <div class="main">
     <div class="container">
+    <?php 
+          if(isset($_GET["text"])){
+            if($_GET["text"] == "success")
+            echo "<p class='text'>We've sent an email to login your account.</p>";
+          }
+
+          if(isset($_GET["text"])){
+            if($_GET["text"] == "mes")
+            echo "<p class='text'>We've sent you the password reset link.</p>";
+          }
+
+          if(isset($_GET["text"])){
+            if($_GET["text"] == "passchange")
+            echo "<p class='text'>Successfully changed your password.</p>";
+          }
+        ?>
       <form action="" method="POST">
         <h2 style="text-align: center; margin-bottom: 10px" >Login your account</h2>
         <input type="text" name="email" value="" placeholder="Email">
         <input type="password" name="pwd" value="" placeholder="Password">
-        <input class="btn" type="submit" name="submit" value="Log in">
+        <input class="btn" type="submit" name="submit" value="Sign in">
       </form>
-      <p>Don't have an account? <a href="signup.php">Register Here! </a></p>
-        <?php 
+      <p class="text1"><a href="forgot-pass.php">Forgot your Password?</a></p>
+      <p class="text2">Don't have an account? <a href="signup.php">Register here!</a></p>
+      <?php 
           if(isset($error)){
-            echo "<p style='text-align: center; padding: 7px; color:#ff0033;'>" . $error ."</p>";
+            echo "<p class='error'>" . $error . "</p>";
           }
         ?>
     </div>
+    
   </div>
-  
+    <?php
+      if(isset($error)){
+    ?>
+      <div class="gif-container">
+        <img class="jif" src="./pic//meme-1.gif" alt="">
+      </div>
+
+      <div class="gif-container2">
+        <img class="jif" src="./pic//meme-2.gif" alt="">
+      </div>
+      <?php
+        }
+      ?>
 </body>
 </html>

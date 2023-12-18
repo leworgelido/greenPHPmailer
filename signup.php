@@ -4,21 +4,38 @@ session_start();
 
 
 if($_SERVER["REQUEST_METHOD"] === "POST"){
-  $username = $_POST["username"];
-  $email = filter_var($_POST["email"], FILTER_VALIDATE_EMAIL);
+  $username = trim($_POST["username"]);
+  $email = trim($_POST["email"]);
 
   $_SESSION["email"] = $email;
   $_SESSION["username"] = $username;
   
   if(empty($username) || empty($email)){
-    $error = "kumpleto dapat lods";
+    $error = "Please fill out the all fields.";
   } else {
-    sendMail($email, $username);
-    header("Location: verify-otp.php");
-    exit();
-  }
+    if(filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      $qry = "SELECT * FROM users WHERE email = :email";
+      $stmt = $pdo->prepare($qry);
+      $stmt->bindParam(":email", $email);
+      $stmt->execute();
+  
+      $user = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+      if(!$user) {
+        sendMail($email, $username);
+        header("Location: verify-otp.php");
+        exit();
+      } else {
+        $error = "The email you entered already exists!";
+    }
 
-} 
+    } else {
+      
+      $error = "Please enter a valid email address.";
+   
+    }
+
+  }} 
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -44,10 +61,11 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: white;
-  padding: 100px;
+  padding: 70px;
   width: 500px;
   border-radius: 2px;
-  
+  box-shadow: 2px 2px 20px rgba(0, 0, 0, .05);
+
 }
 
 form {
@@ -71,7 +89,7 @@ form input:nth-child(4){
   color: white;
   border-radius: 4px;
   cursor: pointer;
-  transition: all .15s ease-in;
+  transition: all .25s ease-in;
 }
 
 form input:nth-child(4):hover {
@@ -80,7 +98,7 @@ form input:nth-child(4):hover {
 }
 
 a{
-  color: rgb(85, 26, 139);
+  color: #7630ff;
   text-decoration: none;
   transition: all .15s ease;
 }
@@ -88,8 +106,25 @@ a{
 a:hover{
   text-decoration: underline;
 }
+.text1 {
+  font-size: 15px;
+  margin-left: 5px;
+}
+
+.text2 {
+  padding: 12px;
+  background-color: #ffcccb;
+  margin-top: 10px;
+  border-radius: 2px;
+  text-align: center;
+  font-size: 15px;
+  color: darkred;
+}
 </style>
 <body>
+  <?php
+    include 'header.php';
+  ?>
   <div class="main">
     <div class="container">
       <form action="" method="POST">
@@ -98,11 +133,11 @@ a:hover{
         <input type="text" name="email" value="" placeholder="Email">
         <input type="submit" name="submit" value="Sign Up">
       </form>
-      <p>Have an account? <a href="index.php">Login Here! </a></p>
+      <p class="text1">Already have an account? <a href="index.php">Login here!</a></p>
       <?php
         if(isset($error))
         {
-          echo " <strong>" .$error . "</strong>";
+          echo "<p class='text2'>" .$error . "</p>";
         }
       ?>
     </div>

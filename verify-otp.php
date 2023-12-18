@@ -8,18 +8,28 @@ $OTP = $_SESSION["OTP"];
 
 if($_SERVER["REQUEST_METHOD"] === "POST"){
   $userOTP = $_POST["otpCode"];
-
-  if($OTP == $userOTP) {
-    header("Location: login.php?text=We've sent you an email to open your account.");
-    unset($_SESSION["OTP"]);
-
-    sendVerificationEmail($email, $username);
-    exit();
-
-  } else{
+  
+  if(empty($userOTP)){
+    $error = "Please enter your OTP code.";
+  } else {
+    if($OTP == $userOTP) {
     
-    $error = "mali OTP mo lods, tignan mo ulit";
+    
+      sendVerificationEmail($email, $username);
+      $Generated_pass = isset($_SESSION["pass"]) ? trim($_SESSION["pass"]) : '';
+      insertUser($pdo, $email, $username, $Generated_pass);
+      unset($Generated_pass);
+      unset($_SESSION["OTP"]);
+      header("Location: index.php?text=success");
+      exit();
+      
+  
+    } else{
+      
+      $error = "You entered the wrong OTP. Please check your email and correct it.";
+    }
   }
+  
 
 }
 ?>
@@ -47,9 +57,10 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: white;
-  padding: 100px;
+  padding: 70px;
   width: 500px;
   border-radius: 2px;
+  box-shadow: 2px 2px 20px rgba(0, 0, 0, .05);
   
 }
 
@@ -74,7 +85,7 @@ form input:nth-child(3){
   color: white;
   border-radius: 4px;
   cursor: pointer;
-  transition: all .15s ease-in;
+  transition: all .25s ease-in-out;
 }
 
 form input:nth-child(3):hover {
@@ -82,7 +93,7 @@ form input:nth-child(3):hover {
   color: black;
 }
 a {
-  color: rgb(85, 26, 139);
+  color: #7630ff;
   text-decoration: none;
   transition: all .15s ease;
 }
@@ -90,18 +101,46 @@ a {
 a:hover{
   text-decoration: underline;
 }
+
+.text {
+  font-size: 16px;
+  margin-bottom: 20px;
+  text-align: center;
+  
+}
+
+.text span {
+  font-weight: 700;
+}
+
+.text1 {
+  padding: 12px;
+  background-color: #ffcccb;
+  margin-top: 10px;
+  border-radius: 2px;
+  text-align: center;
+  font-size: 15px;
+  color: darkred;
+}
+
+.text2  {
+  margin-left: 5px;
+  font-size: 15px;
+  margin-bottom: 5px;
+}
 </style>
 <body>
   <div class="main">
     <div class="container">
       <form action="" method="POST">
-        <h5 style="text-align: center; margin-bottom: 10px" >We've sent the OTP to <?php echo htmlspecialchars($email);?></h5>
-        <input type="text" name="otpCode" value="" placeholder="Enter OTP">
+        <p class="text">We've sent the OTP to <span><?php echo htmlspecialchars($email);?></span></p>
+        <input type="text" name="otpCode" value="" placeholder="Enter OTP" maxlength="6">
         <input type="submit" name="submit" value="Submit">
       </form>
+      <p class="text2">Back to <a href="index.php">Login</a></p>
       <?php 
         if(isset($error)){
-          echo "<strong>" . $error . " </strong>";
+          echo "<p class='text1'>" . $error . "</p>";
         }
       ?>
     </div>
